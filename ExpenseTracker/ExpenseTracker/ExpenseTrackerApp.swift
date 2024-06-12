@@ -9,12 +9,12 @@ import SwiftUI
 
 @main
 struct ExpenseTrackerApp: App {
-    let persistenceController = PersistenceController.shared
+    let persistenceController = CoreDataManager.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environment(\.managedObjectContext, persistenceController.context)
         }
     }
 }
