@@ -2,55 +2,42 @@
 //  ContentView.swift
 //  ExpenseTracker
 //
-//  Created by M1 on 10.06.2024.
+//  Created by M1 on 17.06.2024.
 //
 
 import SwiftUI
-import CoreData
 
 struct ContentView: View {
-    @State private var description: String = ""
-    @State private var amount: String = ""
-    @FetchRequest(entity: Expense.entity(), sortDescriptors: [])
-    var expenses: FetchedResults<Expense>
-    @Environment(\.managedObjectContext) var moc
-
     var body: some View {
         NavigationView {
             VStack {
-                Form {
-                    TextField("Description", text: $description)
-                    TextField("Amount", text: $amount)
-                        .keyboardType(.decimalPad)
-                    Button(action: {
-                        let expense = Expense(context: self.moc)
-                        expense.descriptionText = self.description
-                        expense.amount = Double(self.amount) ?? 0.0
-                        try? self.moc.save()
-                    }) {
-                        Text("Add Expense")
-                    }
+                NavigationLink(destination: ExpenseListView()) {
+                    Text("View Expenses")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
-                List {
-                    ForEach(expenses, id: \.self) { expense in
-                        HStack {
-                            Text(expense.descriptionText ?? "Unknown")
-                            Spacer()
-                            Text("$\(expense.amount, specifier: "%.2f")")
-                        }
-                    }
-                    .onDelete(perform: deleteExpenses)
+                .padding()
+                
+                NavigationLink(destination: AddExpenseView()) {
+                    Text("Add Expense")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
+                .padding()
             }
-            .navigationBarTitle("Expenses")
+            .navigationTitle("Expense Tracker")
         }
     }
+}
 
-    func deleteExpenses(at offsets: IndexSet) {
-        for index in offsets {
-            let expense = expenses[index]
-            moc.delete(expense)
-        }
-        try? moc.save()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }

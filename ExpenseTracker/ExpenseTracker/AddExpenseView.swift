@@ -2,43 +2,63 @@
 //  AddExpenseView.swift
 //  ExpenseTracker
 //
-//  Created by M1 on 10.06.2024.
+//  Created by M1 on 17.06.2024.
 //
 
 import SwiftUI
 
 struct AddExpenseView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var name = ""
-    @State private var amount = ""
-    @State private var category = ""
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    @State private var amount: String = ""
+    @State private var category: String = ""
     @State private var date = Date()
 
     var body: some View {
-        NavigationView {
-            Form {
-                TextField("Name", text: $name)
+        Form {
+            Section(header: Text("Expense Details")) {
                 TextField("Amount", text: $amount)
                     .keyboardType(.decimalPad)
+                
                 TextField("Category", text: $category)
+                
                 DatePicker("Date", selection: $date, displayedComponents: .date)
             }
-            .navigationBarTitle("Add Expense")
-            .navigationBarItems(trailing:
-                                    Button("Save") {
-                                        if let amount = Double(self.amount) {
-                                            CoreDataManager.shared.saveExpense(name: self.name, amount: amount, category: self.category, date: self.date)
-                                            self.presentationMode.wrappedValue.dismiss()
-                                        }
-                                    }
-
-            )
+            
+            Button(action: {
+                addExpense()
+            }) {
+                Text("Save Expense")
+                    .font(.title2)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+        .navigationTitle("Add Expense")
+    }
+    
+    private func addExpense() {
+        let newExpense = Expense(context: viewContext)
+        newExpense.amount = Double(amount) ?? 0.0
+        newExpense.category = category
+        newExpense.date = date
+        
+        do {
+            try viewContext.save()
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
     }
 }
 
 struct AddExpenseView_Previews: PreviewProvider {
     static var previews: some View {
-        AddExpenseView()
+        AddExpenseView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
+
+
+
